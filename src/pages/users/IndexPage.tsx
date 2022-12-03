@@ -1,7 +1,6 @@
 import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { fetchAndSetUsers } from "../../store/redux/users-actions";
-import { AnyAction } from "@reduxjs/toolkit";
 import { useAppDispatch } from "../../store/redux";
 import { useContext } from "react";
 import AuthContext from "../../store/auth";

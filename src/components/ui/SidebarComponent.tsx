@@ -89,6 +89,15 @@ function SidebarComponent() {
               </Link>
             </li>
             <li className="nav-item">
+              <Link to="/dashboard/categories" className="nav-link">
+                <i className="nav-icon fas fa-list"></i>
+                <p>
+                  Categorias
+                  {/* <!-- <span class="right badge badge-danger">New</span> --> */}
+                </p>
+              </Link>
+            </li>
+            <li className="nav-item">
               <Link to="/dashboard/import-users" className="nav-link">
                 <i className="nav-icon fas fa-screwdriver"></i>
                 <p>
@@ -106,6 +115,7 @@ function SidebarComponent() {
                 </p>
               </Link>
             </li>
+
             <li className="nav-item">
               <Link to="/dashboard/import-users" className="nav-link">
                 <i className="nav-icon fas fa-briefcase"></i>

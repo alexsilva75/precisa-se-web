@@ -22,6 +22,7 @@ import {
 
 import store from "./store/redux";
 import DetailPage from "./pages/users/DetailPage";
+import CategoriesIndexPage from "./pages/categories/IndexPage";
 
 const router = createBrowserRouter([
   {
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: "users/:id",
         element: <DetailPage />,
+      },
+      {
+        path: "categories",
+        element: <CategoriesIndexPage />,
       },
     ],
   },
