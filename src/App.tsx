@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import "./App.css";
+// import "./App.css";
 import "./pages/auth/LoginPage";
 import AuthContext from "./store/auth";
 import { useNavigate, Outlet } from "react-router-dom";

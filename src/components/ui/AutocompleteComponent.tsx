@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import SpinnerComponent from "./SpinnerComponent";
 
 const AutoCompleteList = (props: any) => {
   const listGroupRef = useRef<HTMLDivElement>(null);
@@ -12,36 +13,32 @@ const AutoCompleteList = (props: any) => {
       listGroupRef.current?.classList.add("show-autocomplete-before");
     }
   }, [props.show, props.showBefore, props.items]);
-  return (
-    <div ref={listGroupRef} className="list-group autocomplete">
-      {props.items.map((item: any) => (
-        <a key={item.id} className="list-group-item list-group-item-action">
-          {item.name}
-        </a>
-      ))}
 
-      {/* <a href="#" className="list-group-item list-group-item-action active">
-        Teste 01
-      </a>
-      <a href="#" className="list-group-item list-group-item-action">
-        Teste 02
-      </a>
-      <a href="#" className="list-group-item list-group-item-action">
-        Teste 02
-      </a>
-      <a href="#" className="list-group-item list-group-item-action">
-        Teste 02
-      </a>
-      <a href="#" className="list-group-item list-group-item-action">
-        Teste 02
-      </a>
-      <a href="#" className="list-group-item list-group-item-action">
-        Teste 02
-      </a>
-      <a href="#" className="list-group-item list-group-item-action">
-        Teste 02
-      </a> */}
-    </div>
+  function setSelectedItemHandler(item: any) {
+    console.log("Selected Item: ", item);
+    props.selectItem(item);
+  }
+  return (
+    <React.Fragment>
+      {props.items && props.items.length > 0 && (
+        <div ref={listGroupRef} className="list-group autocomplete">
+          {props.items.map((item: any) => (
+            <a
+              key={item.id}
+              className="list-group-item list-group-item-action"
+              onClick={setSelectedItemHandler.bind(this, item)}
+            >
+              {item.name}
+            </a>
+          ))}
+        </div>
+      )}
+      {(!props.items || props.items.length === 0) && (
+        <div className="spinner-wrapper">
+          <SpinnerComponent />
+        </div>
+      )}
+    </React.Fragment>
   );
 };
 
@@ -49,6 +46,7 @@ const AutocompleteComponent = (props: any) => {
   const [showAutoComplete, setShowAutoComplete] = useState(false);
   const [showAutoCompleteBefore, setShowAutoCompleteBefore] = useState(false);
   const autoCompleteRef = useRef<HTMLInputElement>(null);
+  const [inputValue, setInputValue] = useState("");
   const emitValueHandler = (value: string) => {
     props.setValue(value);
   };
@@ -58,6 +56,7 @@ const AutocompleteComponent = (props: any) => {
 
     const inputValue = autoCompleteRef.current!.value;
     emitValueHandler(inputValue);
+    setInputValue(inputValue);
 
     if (inputValue.length >= 3) {
       console.log("Rect Bottom: ", rect.bottom);
@@ -79,6 +78,15 @@ const AutocompleteComponent = (props: any) => {
     console.log(inputValue);
   }
 
+  const setSelectedItem = (item: any) => {
+    emitValueHandler(item.name);
+    setInputValue(item.name);
+    props.selectItem(item.id);
+    setShowAutoComplete(false);
+  };
+
+  useEffect(() => {}, [props.items]);
+
   return (
     <React.Fragment>
       <div className="position-relative autocomplete-input-wrapper">
@@ -90,6 +98,7 @@ const AutocompleteComponent = (props: any) => {
           placeholder="Tecnologia da Informação"
           onChange={showAutoCompleteList}
           ref={autoCompleteRef}
+          value={inputValue}
         />
         {showAutoComplete && (
           <AutoCompleteList
@@ -98,6 +107,7 @@ const AutocompleteComponent = (props: any) => {
             items={props.items}
             position="after"
             startPosition="bottom"
+            selectItem={setSelectedItem}
           />
         )}
       </div>

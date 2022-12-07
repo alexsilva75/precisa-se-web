@@ -4,7 +4,7 @@ import SidebarComponent from "../components/ui/SidebarComponent";
 import DashboardContentBase from "../components/DashboardContentBase";
 import FooterComponent from "../components/ui/FooterComponent";
 import AuthContext from "../store/auth";
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import SpinnerComponent from "../components/ui/SpinnerComponent";
 
 function DashboardPage() {
@@ -24,7 +24,7 @@ function DashboardPage() {
 
   if (!isLoading) {
     return (
-      <div className="wrapper">
+      <React.Fragment>
         <NavbarComponent />
         <SidebarComponent />
         <div className="content-wrapper">
@@ -42,13 +42,16 @@ function DashboardPage() {
               </div>
             </div>
           </div>
-
-          <DashboardContentBase>
-            <Outlet />
-          </DashboardContentBase>
+          <section className="content">
+            <DashboardContentBase>
+              <Outlet />
+            </DashboardContentBase>
+          </section>
         </div>
         <FooterComponent />
-      </div>
+
+        <aside className="control-sidebar control-sidebar-dark"></aside>
+      </React.Fragment>
     );
   } else {
     return <SpinnerComponent />;

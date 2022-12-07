@@ -81,7 +81,6 @@ const LoginPage = () => {
                   </label>
                   <input
                     type="text"
-                    v-model="username"
                     className="form-control"
                     onChange={onUsernameInputChangeHandler}
                   />

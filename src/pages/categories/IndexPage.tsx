@@ -1,121 +1,30 @@
-import { useEffect, useState, useRef, FormEvent } from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useContext } from "react";
 import ReactDOM from "react-dom";
+import "react-toastify/dist/ReactToastify.css";
 import AuthContext from "../../store/auth";
-
-import {
-  fetchAndSetCategories,
-  fetchAndSetFilteredCategories,
-} from "../../store/redux/categories-actions";
+import NewCategoryModalForm from "../../components/category/NewCategoryModalForm";
+import { fetchAndSetCategories } from "../../store/redux/categories-actions";
 import { useAppDispatch } from "../../store/redux";
 
-import AutocompleteComponent from "../../components/ui/AutocompleteComponent";
-
-const ModalOverlay = (props: any) => {
-  return (
-    <div className="modal fade" tabIndex={-1} role="dialog" id="exampleModal">
-      <div className="modal-dialog" role="document">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Nova Categoria</h5>
-            <button
-              type="button"
-              className="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div className="modal-body">
-            <form>
-              <div className="form-group">
-                <label htmlFor="categoryName">Nome da Categoria</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="categoryName"
-                  placeholder="Ex.: Banco de Dados"
-                />
-              </div>
-              <div className="form-group ">
-                <label htmlFor="parentCategory">Categoria Principal</label>
-                <AutocompleteComponent
-                  items={props.filteredCategories}
-                  setValue={props.searchFilteredCategoriesHandler}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="description">Descrição</label>
-                <textarea
-                  className="form-control"
-                  id="description"
-                  placeholder="Tecnologia da Informação"
-                  maxLength={300}
-                ></textarea>
-              </div>
-            </form>
-          </div>
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              data-dismiss="modal"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={props.onSubmitHandler}
-              type="button"
-              className="btn btn-primary"
-            >
-              Salvar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+import SpinnerComponent from "../../components/ui/SpinnerComponent";
 
 const CategoriesIndexPage = () => {
   const categories = useSelector((state: any) => state.categories.categories);
-  const filteredCategories = useSelector(
-    (state: any) => state.categories.filteredCategories
-  );
+  const isLoading = useSelector((state: any) => state.categories.isLoading);
+
   const dispatch = useAppDispatch();
   const context = useContext(AuthContext);
 
-  const [parentCategoryName, setParentCategoryName] = useState<string>("");
-  const [selectedParentCategory, setSelectedParentCategory] = useState(null);
-
   useEffect(() => {
     dispatch(fetchAndSetCategories({ token: context?.token }));
-    console.log("Categories: ", categories);
+    // console.log("Categories: ", categories);
   }, [dispatch]);
 
-  function searchFilteredCategoriesHandler(categoryName: string) {
-    if (categoryName.length >= 3) {
-      dispatch(
-        fetchAndSetFilteredCategories({
-          search: categoryName,
-          token: context?.token,
-        })
-      );
-    }
-    setParentCategoryName(categoryName);
-  }
-
-  function selectedParentCategoryHandler(category: any) {
-    setSelectedParentCategory(category);
-  }
-  function onSubmitHandler() {
-    //
-
-    console.log("Submiting form...");
-    console.log("Parent category: ", parentCategoryName);
-  }
+  useEffect(() => {
+    console.log("Is Loading: ", isLoading);
+  }, [isLoading]);
 
   return (
     <div>
@@ -145,43 +54,42 @@ const CategoriesIndexPage = () => {
       </button>
 
       {ReactDOM.createPortal(
-        <ModalOverlay
-          filteredCategories={filteredCategories}
-          searchFilteredCategoriesHandler={searchFilteredCategoriesHandler}
-          onSubmitHandler={onSubmitHandler}
-        />,
+        <NewCategoryModalForm />,
         document.getElementById("overlay-root") as Element
       )}
 
-      <div className="accordion" id="accordionExample">
-        {categories.map((cat: any) => (
-          <div className="card">
-            <div className="card-header" id="headingOne">
-              <h2 className="mb-0">
-                <button
-                  className="accordion-button d-flex justify-content-between btn btn-link btn-block text-left"
-                  type="button"
-                  data-toggle="collapse"
-                  data-target="#collapseOne"
-                  aria-expanded="false"
-                  aria-controls="collapseOne"
-                >
-                  {cat.name}
-                </button>
-              </h2>
-            </div>
+      {isLoading && <SpinnerComponent />}
+      {!isLoading && (
+        <div className="accordion mt-4" id="accordionExample">
+          {categories.map((cat: any) => (
+            <div key={cat.id} className="card">
+              <div className="card-header" id={`heading-${cat.id}`}>
+                <h2 className="mb-0">
+                  <button
+                    className="accordion-button collapsed d-flex justify-content-between btn btn-link btn-block text-left"
+                    type="button"
+                    data-toggle="collapse"
+                    data-target={`#collapse-${cat.id}`}
+                    aria-expanded="false"
+                    aria-controls={`collapse-${cat.id}`}
+                  >
+                    {cat.name}
+                  </button>
+                </h2>
+              </div>
 
-            <div
-              id="collapseOne"
-              className="collapse show"
-              aria-labelledby="headingOne"
-              data-parent="#accordionExample"
-            >
-              <div className="card-body">{cat.description}</div>
+              <div
+                id={`collapse-${cat.id}`}
+                className="collapse"
+                aria-labelledby={`heading-${cat.id}`}
+                data-parent="#accordionExample"
+              >
+                <div className="card-body">{cat.description}</div>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
