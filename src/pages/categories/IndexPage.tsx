@@ -1,11 +1,15 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useContext } from "react";
 import ReactDOM from "react-dom";
 import "react-toastify/dist/ReactToastify.css";
 import AuthContext from "../../store/auth";
 import NewCategoryModalForm from "../../components/category/NewCategoryModalForm";
-import { fetchAndSetCategories } from "../../store/redux/categories-actions";
+import EditCategoryModalForm from "../../components/category/EditCategoryModalForm";
+import {
+  fetchAndSetCategories,
+  setEditCategoryId,
+} from "../../store/redux/categories-actions";
 import { useAppDispatch } from "../../store/redux";
 
 import SpinnerComponent from "../../components/ui/SpinnerComponent";
@@ -16,6 +20,10 @@ const CategoriesIndexPage = () => {
 
   const dispatch = useAppDispatch();
   const context = useContext(AuthContext);
+
+  const setSelectedEditCategoryHandler = (id: number) => {
+    dispatch(setEditCategoryId(id));
+  };
 
   useEffect(() => {
     dispatch(fetchAndSetCategories({ token: context?.token }));
@@ -58,6 +66,11 @@ const CategoriesIndexPage = () => {
         document.getElementById("overlay-root") as Element
       )}
 
+      {ReactDOM.createPortal(
+        <EditCategoryModalForm />,
+        document.getElementById("overlay-root") as Element
+      )}
+
       {isLoading && <SpinnerComponent />}
       {!isLoading && (
         <div className="accordion mt-4" id="accordionExample">
@@ -85,6 +98,17 @@ const CategoriesIndexPage = () => {
                 data-parent="#accordionExample"
               >
                 <div className="card-body">{cat.description}</div>
+                <div className="d-flex justify-content-end p-2">
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    data-toggle="modal"
+                    data-target="#editCategoryModal"
+                    onClick={setSelectedEditCategoryHandler.bind(this, cat.id)}
+                  >
+                    Editar
+                  </button>
+                </div>
               </div>
             </div>
           ))}

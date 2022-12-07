@@ -90,6 +90,52 @@ export const createNewCategory = (params: any) => {
   };
 };
 
+export const updateCategory = (params: any) => {
+  return async (dispatch: any) => {
+    dispatch(categoriesActions.setIsSendingRequest(true));
+    try {
+      const response = await axios.put(
+        `${options.baseURL}/api/v1/category/${params.id}`,
+        params.formData,
+        {
+          headers: {
+            Authorization: `Bearer ${params.token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        //
+        dispatch(
+          categoriesActions.setRequestResult({
+            status: "success",
+            message: "A Categoria foi atualizada com sucesso.",
+          })
+        );
+        dispatch(fetchAndSetCategories({ token: params.token }));
+        console.log("Filtered Categories: ", response.data.categories);
+      } else {
+        dispatch(
+          categoriesActions.setRequestResult({
+            status: "error",
+            message: response.data.message,
+          })
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(
+        categoriesActions.setRequestResult({
+          status: "error",
+          message: "Houve um erro ao tentar atualizar a categoria.",
+        })
+      );
+    }
+
+    dispatch(categoriesActions.setIsSendingRequest(false));
+  };
+};
+
 export const setRequestResult = (params: any) => {
   return (dispatch: any) => {
     dispatch(
@@ -98,5 +144,11 @@ export const setRequestResult = (params: any) => {
         message: params.message,
       })
     );
+  };
+};
+
+export const setEditCategoryId = (id: number | null) => {
+  return (dispatch: any) => {
+    dispatch(categoriesActions.setEditCategoryId(id));
   };
 };

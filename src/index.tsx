@@ -23,11 +23,13 @@ import {
 import store from "./store/redux";
 import DetailPage from "./pages/users/DetailPage";
 import CategoriesIndexPage from "./pages/categories/IndexPage";
+import ErrorPage from "./pages/ErrorPage";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
+    errorElement: <ErrorPage />,
   },
   {
     path: "/login",

@@ -6,6 +6,7 @@ interface CategoriesState {
   categories: [];
   filteredCategories: [];
   requestResult: { status: string; message: string };
+  editCategoryId: number | null;
 }
 
 const initialState = {
@@ -14,6 +15,7 @@ const initialState = {
   isSendingRequest: false,
   isLoading: false,
   requestResult: { status: "", message: "" },
+  editCategoryId: null,
 } as CategoriesState;
 
 const categoriesSlice = createSlice({
@@ -39,6 +41,9 @@ const categoriesSlice = createSlice({
     setIsLoading(state, action) {
       console.log("Is Loading action: ", action.payload);
       state.isLoading = action.payload;
+    },
+    setEditCategoryId(state, action) {
+      state.editCategoryId = action.payload;
     },
   },
 });

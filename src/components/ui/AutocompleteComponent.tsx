@@ -75,7 +75,7 @@ const AutocompleteComponent = (props: any) => {
     } else {
       setShowAutoComplete(false);
     }
-    console.log(inputValue);
+    //console.log(inputValue);
   }
 
   const setSelectedItem = (item: any) => {
@@ -87,6 +87,11 @@ const AutocompleteComponent = (props: any) => {
 
   useEffect(() => {}, [props.items]);
 
+  useEffect(() => {
+    if (props.initialValue) {
+      setInputValue(props.initialValue);
+    }
+  }, [props.initialValue]);
   return (
     <React.Fragment>
       <div className="position-relative autocomplete-input-wrapper">
