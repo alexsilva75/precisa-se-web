@@ -1,0 +1,8 @@
+.paginatorLink {
+  padding: 12px;
+  cursor: pointer;
+}
+
+.paginatorCurrent {
+  padding: 12px;
+}

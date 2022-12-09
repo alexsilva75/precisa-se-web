@@ -97,6 +97,16 @@ function SidebarComponent() {
                 </p>
               </Link>
             </li>
+
+            <li className="nav-item">
+              <Link to="/dashboard/import-users" className="nav-link">
+                <i className="nav-icon fas fa-suitcase"></i>
+                <p>
+                  Profissões
+                  {/* <!-- <span class="right badge badge-danger">New</span> --> */}
+                </p>
+              </Link>
+            </li>
             <li className="nav-item">
               <Link to="/dashboard/import-users" className="nav-link">
                 <i className="nav-icon fas fa-screwdriver"></i>

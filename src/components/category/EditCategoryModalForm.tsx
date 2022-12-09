@@ -9,6 +9,8 @@ import {
   fetchAndSetFilteredCategories,
   updateCategory,
   setRequestResult,
+  resetFilteredCategories,
+  setEditCategoryId,
 } from "../../store/redux/categories-actions";
 import AutocompleteComponent from "../ui/AutocompleteComponent";
 import SpinnerComponent from "../ui/SpinnerComponent";
@@ -20,7 +22,7 @@ interface FormState {
   formIsValid: boolean;
 }
 
-const initialState = {
+let initialState = {
   categoryNameState: { value: "", isValid: false },
   parentCategoryState: { value: "", isValid: false, id: 0 },
   categoryDescriptionState: { value: "", isValid: false },
@@ -31,9 +33,9 @@ const formReducer = (state: any, action: { type: string; payload?: any }) => {
   switch (action.type) {
     case "INIT_FORM": {
       const category = action.payload;
-      console.log("Selected Edit Category: ", category);
+      //console.log("Selected Edit Category: ", category);
       if (category) {
-        return {
+        initialState = {
           categoryNameState: { value: category.name, isValid: true },
           parentCategoryState: {
             value: category.parent ? category.parent.name : "",
@@ -46,9 +48,8 @@ const formReducer = (state: any, action: { type: string; payload?: any }) => {
           },
           formIsValid: true,
         };
-      } else {
-        return { ...initialState };
       }
+      return { ...initialState };
     }
     case "CATEGORY_NAME": {
       const value = action.payload;
@@ -64,7 +65,7 @@ const formReducer = (state: any, action: { type: string; payload?: any }) => {
     }
     case "PARENT_CATEGORY": {
       const value = action.payload.value;
-      console.log("Parent Category: ", value);
+      //console.log("Parent Category: ", value);
       return {
         ...state,
         parentCategoryState: {
@@ -92,6 +93,9 @@ const formReducer = (state: any, action: { type: string; payload?: any }) => {
     case "CLEAR_FORM": {
       return { ...initialState };
     }
+    case "DISMISS_FORM": {
+      return { ...initialState };
+    }
     default:
       return { ...state };
   }
@@ -102,6 +106,9 @@ const EditCategoryModalForm = (props: any) => {
   const buttonCloseRef = useRef<HTMLButtonElement>(null);
   const isSendingRequest = useSelector(
     (state: any) => state.categories.isSendingRequest
+  );
+  const isLoadingFiltered = useSelector(
+    (state: any) => state.categories.isLoadingFiltered
   );
   const [parentCategoryName, setParentCategoryName] = useState<string>("");
   const dispatch = useAppDispatch();
@@ -124,7 +131,7 @@ const EditCategoryModalForm = (props: any) => {
   };
 
   const onParentCategoryChangeHandler = (value: string) => {
-    console.log("onParentCategoryChangeHandler: ", value);
+    //console.log("onParentCategoryChangeHandler: ", value);
     if (value.length >= 3) {
       dispatch(
         fetchAndSetFilteredCategories({ search: value, token: context?.token })
@@ -146,6 +153,9 @@ const EditCategoryModalForm = (props: any) => {
     });
   }
 
+  function dismissModal() {
+    formDispatch({ type: "DISMISS_FORM" });
+  }
   function onSubmitHandler() {
     dispatch(
       updateCategory({
@@ -164,19 +174,25 @@ const EditCategoryModalForm = (props: any) => {
 
   useEffect(() => {
     if (!isSendingRequest && requestResult.status === "success") {
-      console.log("Message: ", requestResult.message);
-      toast.success("Categoria salva com sucesso.");
+      //console.log("Message: ", requestResult.message);
+      toast.success("Categoria alterada com sucesso.", {
+        containerId: "edit",
+      });
       setTimeout(() => {
-        formDispatch({ type: "CLEAR_FORM" });
+        // formDispatch({ type: "CLEAR_FORM" });
         onParentCategoryChangeHandler("");
+        toast.dismiss();
         buttonCloseRef.current!.click();
-      }, 6000);
+      }, 3500);
     } else if (!isSendingRequest && requestResult.status === "error") {
-      console.log("An error has occurred. ");
-      toast.success("Houve um erro ao tentar salvar a categoria.");
+      //console.log("An error has occurred. ");
+      toast.success("Houve um erro ao tentar salvar a categoria.", {
+        containerId: "edit",
+      });
       setTimeout(() => {
+        toast.dismiss();
         buttonCloseRef.current!.click();
-      }, 6000);
+      }, 3500);
     }
 
     return () => {
@@ -190,7 +206,7 @@ const EditCategoryModalForm = (props: any) => {
         formState.parentCategoryState.value &&
         formState.parentCategoryState.value.length >= 3
       ) {
-        console.log("searching in timeout");
+        //console.log("searching in timeout");
         dispatch(
           fetchAndSetFilteredCategories({
             search: formState.parentCategoryState.value,
@@ -214,6 +230,20 @@ const EditCategoryModalForm = (props: any) => {
       formDispatch({ type: "INIT_FORM", payload: category });
     }
   }, [editCategoryId]);
+
+  useEffect(() => {
+    return () => {
+      if (!editCategoryId) {
+        dispatch(resetFilteredCategories());
+      }
+    };
+  }, [editCategoryId]);
+
+  useEffect(() => {
+    return () => {
+      setEditCategoryId(null);
+    };
+  }, []);
   return (
     <div
       className="modal fade"
@@ -235,7 +265,11 @@ const EditCategoryModalForm = (props: any) => {
             </button>
           </div>
           <div className="modal-body">
-            <ToastContainer />
+            <ToastContainer
+              enableMultiContainer
+              containerId={"edit"}
+              autoClose={3000}
+            />
             <form>
               <div className="form-group">
                 <label htmlFor="categoryName">Nome da Categoria</label>
@@ -254,7 +288,8 @@ const EditCategoryModalForm = (props: any) => {
                   items={filteredCategories}
                   setValue={onParentCategoryChangeHandler}
                   selectItem={selectedParentCategoryHandler}
-                  initialValue={formState.parentCategoryState.value}
+                  caption={formState.parentCategoryState.value}
+                  isLoading={isLoadingFiltered}
                 />
               </div>
               <div className="form-group">
@@ -280,6 +315,7 @@ const EditCategoryModalForm = (props: any) => {
                   className="btn btn-secondary"
                   data-dismiss="modal"
                   ref={buttonCloseRef}
+                  onClick={dismissModal}
                 >
                   Fechar
                 </button>

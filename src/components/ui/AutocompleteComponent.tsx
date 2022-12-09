@@ -12,12 +12,13 @@ const AutoCompleteList = (props: any) => {
     if (props.showBefore) {
       listGroupRef.current?.classList.add("show-autocomplete-before");
     }
-  }, [props.show, props.showBefore, props.items]);
+  }, [props.show, props.showBefore, props.items, props.isLoading]);
 
   function setSelectedItemHandler(item: any) {
-    console.log("Selected Item: ", item);
+    //console.log("Selected Item: ", item);
     props.selectItem(item);
   }
+
   return (
     <React.Fragment>
       {props.items && props.items.length > 0 && (
@@ -33,7 +34,7 @@ const AutoCompleteList = (props: any) => {
           ))}
         </div>
       )}
-      {(!props.items || props.items.length === 0) && (
+      {props.isLoading && (
         <div className="spinner-wrapper">
           <SpinnerComponent />
         </div>
@@ -59,13 +60,13 @@ const AutocompleteComponent = (props: any) => {
     setInputValue(inputValue);
 
     if (inputValue.length >= 3) {
-      console.log("Rect Bottom: ", rect.bottom);
-      console.log("Window innerHeight", window.innerHeight);
+      //console.log("Rect Bottom: ", rect.bottom);
+      //console.log("Window innerHeight", window.innerHeight);
       if (
         rect.bottom + 150 >
         (window.innerHeight || document.documentElement.clientHeight)
       ) {
-        console.log("Showing before");
+        //console.log("Showing before");
         setShowAutoCompleteBefore(true);
       } else {
         setShowAutoCompleteBefore(false);
@@ -85,13 +86,10 @@ const AutocompleteComponent = (props: any) => {
     setShowAutoComplete(false);
   };
 
-  useEffect(() => {}, [props.items]);
-
   useEffect(() => {
-    if (props.initialValue) {
-      setInputValue(props.initialValue);
-    }
-  }, [props.initialValue]);
+    //console.log("Is Loading in AutocompleteComponent", props.isLoading);
+  }, [props.items, props.isLoading]);
+
   return (
     <React.Fragment>
       <div className="position-relative autocomplete-input-wrapper">
@@ -103,7 +101,7 @@ const AutocompleteComponent = (props: any) => {
           placeholder="Tecnologia da Informação"
           onChange={showAutoCompleteList}
           ref={autoCompleteRef}
-          value={inputValue}
+          value={props.caption}
         />
         {showAutoComplete && (
           <AutoCompleteList
@@ -113,6 +111,7 @@ const AutocompleteComponent = (props: any) => {
             position="after"
             startPosition="bottom"
             selectItem={setSelectedItem}
+            isLoading={props.isLoading}
           />
         )}
       </div>

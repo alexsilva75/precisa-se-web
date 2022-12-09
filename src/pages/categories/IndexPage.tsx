@@ -6,9 +6,11 @@ import "react-toastify/dist/ReactToastify.css";
 import AuthContext from "../../store/auth";
 import NewCategoryModalForm from "../../components/category/NewCategoryModalForm";
 import EditCategoryModalForm from "../../components/category/EditCategoryModalForm";
+import PaginationComponent from "../../components/ui/PaginationComponent";
 import {
   fetchAndSetCategories,
   setEditCategoryId,
+  resetFilteredCategories,
 } from "../../store/redux/categories-actions";
 import { useAppDispatch } from "../../store/redux";
 
@@ -17,21 +19,33 @@ import SpinnerComponent from "../../components/ui/SpinnerComponent";
 const CategoriesIndexPage = () => {
   const categories = useSelector((state: any) => state.categories.categories);
   const isLoading = useSelector((state: any) => state.categories.isLoading);
+  const paginationData = useSelector(
+    (state: any) => state.categories.paginationData
+  );
+  const [currentPage, setCurrentPage] = useState(1);
 
   const dispatch = useAppDispatch();
   const context = useContext(AuthContext);
 
   const setSelectedEditCategoryHandler = (id: number) => {
     dispatch(setEditCategoryId(id));
+    resetFilteredCategoriesHandler();
+  };
+
+  const resetFilteredCategoriesHandler = () => {
+    dispatch(resetFilteredCategories());
   };
 
   useEffect(() => {
-    dispatch(fetchAndSetCategories({ token: context?.token }));
+    console.log("Searching page: ", currentPage);
+    dispatch(
+      fetchAndSetCategories({ token: context?.token, page: currentPage })
+    );
     // console.log("Categories: ", categories);
-  }, [dispatch]);
+  }, [dispatch, currentPage]);
 
   useEffect(() => {
-    console.log("Is Loading: ", isLoading);
+    //console.log("Is Loading: ", isLoading);
   }, [isLoading]);
 
   return (
@@ -57,6 +71,7 @@ const CategoriesIndexPage = () => {
         className="btn btn-primary"
         data-toggle="modal"
         data-target="#exampleModal"
+        onClick={resetFilteredCategoriesHandler}
       >
         Nova Categoria
       </button>
@@ -113,6 +128,14 @@ const CategoriesIndexPage = () => {
             </div>
           ))}
         </div>
+      )}
+      {categories && categories.length > 0 && !isLoading && (
+        <PaginationComponent
+          currentPage={paginationData.currentPage}
+          prevPage={paginationData.prevPage}
+          nextPage={paginationData.nextPage}
+          setPage={setCurrentPage}
+        />
       )}
     </div>
   );

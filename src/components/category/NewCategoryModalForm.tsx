@@ -9,6 +9,7 @@ import {
   fetchAndSetFilteredCategories,
   createNewCategory,
   setRequestResult,
+  resetFilteredCategories,
 } from "../../store/redux/categories-actions";
 import AutocompleteComponent from "../../components/ui/AutocompleteComponent";
 import SpinnerComponent from "../../components/ui/SpinnerComponent";
@@ -93,12 +94,15 @@ const NewCategoryModalForm = (props: any) => {
   const requestResult = useSelector(
     (state: any) => state.categories.requestResult
   );
+  const isLoadingFiltered = useSelector(
+    (state: any) => state.categories.isLoadingFiltered
+  );
   const onCategoryNameChangeHandler = (event: any) => {
     formDispatch({ type: "CATEGORY_NAME", payload: event.target.value });
   };
 
   const onParentCategoryChangeHandler = (value: string) => {
-    console.log("onParentCategoryChangeHandler: ", value);
+    //console.log("onParentCategoryChangeHandler: ", value);
     if (value.length >= 3) {
       dispatch(
         fetchAndSetFilteredCategories({ search: value, token: context?.token })
@@ -135,21 +139,30 @@ const NewCategoryModalForm = (props: any) => {
     );
   }
 
+  function dismissModal() {
+    formDispatch({ type: "CLEAR_FORM" });
+  }
   useEffect(() => {
     if (!isSendingRequest && requestResult.status === "success") {
       console.log("Message: ", requestResult.message);
-      toast.success("Categoria salva com sucesso.");
+      toast.success("Categoria salva com sucesso.", {
+        containerId: "new",
+      });
       setTimeout(() => {
         formDispatch({ type: "CLEAR_FORM" });
         onParentCategoryChangeHandler("");
+        toast.dismiss();
         buttonCloseRef.current!.click();
-      }, 6000);
+      }, 3500);
     } else if (!isSendingRequest && requestResult.status === "error") {
       console.log("An error has occurred. ");
-      toast.success("Houve um erro ao tentar salvar a categoria.");
+      toast.success("Houve um erro ao tentar salvar a categoria.", {
+        containerId: "new",
+      });
       setTimeout(() => {
+        toast.dismiss();
         buttonCloseRef.current!.click();
-      }, 6000);
+      }, 3500);
     }
 
     return () => {
@@ -193,7 +206,11 @@ const NewCategoryModalForm = (props: any) => {
             </button>
           </div>
           <div className="modal-body">
-            <ToastContainer />
+            <ToastContainer
+              enableMultiContainer
+              containerId={"new"}
+              autoClose={5000}
+            />
             <form>
               <div className="form-group">
                 <label htmlFor="categoryName">Nome da Categoria</label>
@@ -212,6 +229,8 @@ const NewCategoryModalForm = (props: any) => {
                   items={filteredCategories}
                   setValue={onParentCategoryChangeHandler}
                   selectItem={selectedParentCategoryHandler}
+                  caption={formState.parentCategoryState.value}
+                  isLoading={isLoadingFiltered}
                 />
               </div>
               <div className="form-group">
@@ -237,6 +256,7 @@ const NewCategoryModalForm = (props: any) => {
                   className="btn btn-secondary"
                   data-dismiss="modal"
                   ref={buttonCloseRef}
+                  onClick={dismissModal}
                 >
                   Fechar
                 </button>

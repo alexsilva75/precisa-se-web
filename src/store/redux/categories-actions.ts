@@ -6,16 +6,30 @@ import options from "../../globalOptions";
 
 export const fetchAndSetCategories = (params: any) => {
   return async (dispatch: any) => {
+    const page = params.page ? params.page : 1;
     dispatch(categoriesActions.setIsLoading(true));
-    const response = await axios.get(`${options.baseURL}/api/v1/category`, {
-      headers: {
-        Authorization: `Bearer ${params.token}`,
-      },
-    });
+    console.log("Sending request for page: ", page);
+    const response = await axios.get(
+      `${options.baseURL}/api/v1/category?page=${page}`,
+      {
+        headers: {
+          Authorization: `Bearer ${params.token}`,
+        },
+      }
+    );
 
     if (response.status === 200) {
       console.log("Categories Response: ", response);
       dispatch(categoriesActions.setCategories(response.data.categories));
+      dispatch(
+        categoriesActions.setPaginationData({
+          currentPage: response.data.currentPage,
+          prevPage: response.data.prevPage,
+          nextPage: response.data.nextPage,
+          resultCount: response.data.count,
+          totalPages: response.data.pages,
+        })
+      );
     }
     dispatch(categoriesActions.setIsLoading(false));
   };
@@ -23,6 +37,7 @@ export const fetchAndSetCategories = (params: any) => {
 
 export const fetchAndSetFilteredCategories = (params: any) => {
   return async (dispatch: any) => {
+    dispatch(categoriesActions.setIsLoadingFiltered(true));
     const response = await axios.get(
       `${options.baseURL}/api/v1/category?s=${params.search}`,
       {
@@ -37,8 +52,9 @@ export const fetchAndSetFilteredCategories = (params: any) => {
       dispatch(
         categoriesActions.setFilteredCategories(response.data.categories)
       );
-      console.log("Filtered Categories: ", response.data.categories);
+      //console.log("Filtered Categories: ", response.data.categories);
     }
+    dispatch(categoriesActions.setIsLoadingFiltered(false));
   };
 };
 
@@ -133,6 +149,7 @@ export const updateCategory = (params: any) => {
     }
 
     dispatch(categoriesActions.setIsSendingRequest(false));
+    dispatch(categoriesActions.setEditCategoryId(null));
   };
 };
 
@@ -150,5 +167,11 @@ export const setRequestResult = (params: any) => {
 export const setEditCategoryId = (id: number | null) => {
   return (dispatch: any) => {
     dispatch(categoriesActions.setEditCategoryId(id));
+  };
+};
+
+export const resetFilteredCategories = () => {
+  return (dispatch: any) => {
+    dispatch(categoriesActions.setFilteredCategories([]));
   };
 };
